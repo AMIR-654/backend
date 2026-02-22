@@ -16,6 +16,9 @@ const JWT_SECRET = process.env.JWT_SECRET || "super_secret_key";
 // DB مؤقت (ذاكرة)
 const users = [];
 
+app.get("/", (req, res) => {
+  res.send("API WORKING");
+});
 // =======================
 // اختبار السيرفر
 // =======================
