@@ -4,31 +4,23 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 
+// ================= CONFIG =================
+const PORT = process.env.PORT || 5000;
+const JWT_SECRET = process.env.JWT_SECRET || "amir_super_secret";
+
+// ================= MIDDLEWARE =================
 app.use(cors());
 app.use(express.json());
 
-// =======================
-// إعدادات
-// =======================
-
-const JWT_SECRET = process.env.JWT_SECRET || "super_secret_key";
-
-// DB مؤقت (ذاكرة)
+// ================= FAKE DB (مؤقت) =================
 const users = [];
 
+// ================= ROOT =================
 app.get("/", (req, res) => {
-  res.send("API WORKING");
-});
-// =======================
-// اختبار السيرفر
-// =======================
-app.get("/", (req, res) => {
-  res.json({ status: "API is running 🚀" });
+  res.json({ message: "API Running 🚀" });
 });
 
-// =======================
-// REGISTER
-// =======================
+// ================= REGISTER =================
 app.post("/auth/register", (req, res) => {
   const { email, password, name } = req.body;
 
@@ -55,13 +47,16 @@ app.post("/auth/register", (req, res) => {
 
   res.json({
     access_token: token,
-    user: { id: user.id, email, name, role: user.role }
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role
+    }
   });
 });
 
-// =======================
-// LOGIN
-// =======================
+// ================= LOGIN =================
 app.post("/auth/login", (req, res) => {
   const { email, password } = req.body;
 
@@ -70,7 +65,7 @@ app.post("/auth/login", (req, res) => {
   );
 
   if (!user) {
-    return res.status(401).json({ error: "Invalid credentials" });
+    return res.status(401).json({ error: "Invalid email or password" });
   }
 
   const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "7d" });
@@ -86,15 +81,12 @@ app.post("/auth/login", (req, res) => {
   });
 });
 
-// =======================
-// Middleware تحقق JWT
-// =======================
-function authMiddleware(req, res, next) {
-  const auth = req.headers.authorization;
+// ================= AUTH MIDDLEWARE =================
+function auth(req, res, next) {
+  const header = req.headers.authorization;
+  if (!header) return res.status(401).json({ error: "No token" });
 
-  if (!auth) return res.status(401).json({ error: "No token" });
-
-  const token = auth.split(" ")[1];
+  const token = header.split(" ")[1];
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -105,10 +97,8 @@ function authMiddleware(req, res, next) {
   }
 }
 
-// =======================
-// GET USER INFO
-// =======================
-app.get("/auth/me", authMiddleware, (req, res) => {
+// ================= GET USER =================
+app.get("/auth/me", auth, (req, res) => {
   const user = users.find(u => u.id === req.userId);
   if (!user) return res.status(404).json({ error: "User not found" });
 
@@ -122,8 +112,7 @@ app.get("/auth/me", authMiddleware, (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 8080;
-
+// ================= START SERVER =================
 app.listen(PORT, () => {
   console.log("Server running on port", PORT);
 });
