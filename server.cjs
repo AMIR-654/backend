@@ -10,7 +10,7 @@ app.use(express.json());
 // =======================
 // إعدادات
 // =======================
-const PORT = process.env.PORT || 5000;
+
 const JWT_SECRET = process.env.JWT_SECRET || "super_secret_key";
 
 // DB مؤقت (ذاكرة)
