@@ -10,7 +10,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 8080;
 const JWT_SECRET = "amir_secret";
 
-// ================= DATABASE =================
+// ================= DATABASE ===============
 const users = [];
 const bookings = [];
 
